@@ -54,9 +54,136 @@ if(exists $ARGV[0] && $ARGV[0] eq 'README.pod')
 }
 
 
+################################################################################
+################################################################################
+## Here we check for a working gnuplot.  What better way to do that than by
+## executing our own library?  
+{
+    my $get_msg = '';
+
+    eval q{ do q{./lib/Alien/Gnuplot.pm}; $get_msg = $@;};
+    
+    unless($get_msg) {
+	if($Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION > $Alien::Gnuplot::version) {
+	    $get_msg = qq{
+Gnuplot seems to exist on your system, but it is version $Alien::Gnuplot::version.
+The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
+
+}
+	}
+
+    }
+
+    if($get_msg) {
+	print $get_msg . q{
+Attempting to install/upgrade gnuplot on your system....
+
+};
+	if( install_gnuplot_binary() ) {
+	    print "\nGnuplot installation was successful - not building from source.\n";
+	} else {
+
+	    
+
+	}
+    }
+}	
+
 ##############################
 ##############################
-## Write a generic Makefile that puts the module in place.
+## The pedal meets the metal here.
+##
+## The strategy is to try to get a late-model
+## binary from the Usual Suspects, and fall back
+## to compiling it.
+## 
+## On success, return 1; on failure return 0.
+## Try not to crash.
+
+sub install_gnuplot_binary {
+    local($|) = 1;
+
+    ##############################
+    # 
+    if($^O eq 'darwin') {
+	##############################
+	# Binary distros on mac - try macports, fink, homebrew
+	for my $manager( ['macports','port','http://macports.org'],
+			 ['fink','fink','http://www.finkproject.org'],
+			 ['homebrew','brew','http://mxcl.github.com/homebrew/']
+	    ) {
+	    print "Trying $manager->[0] (you can get it at $manager->[2])...";
+	    my $l = `which $manager->[1]`;
+	    if($l) {
+		print "\n";
+		print STDERR `$manager->[1] install gnuplot`;
+		my $msg;
+		eval q{ do q{lib/Alien/Gnuplot.pm}; $msg = $@; } ;
+		
+		if( ((!$msg) and ($Alien::Gnuplot::version))) {
+		    print "Success!\n";
+		    return 1;               # Success - return 1
+		} else {
+		    return 0;               # Failure - give up (once you find one package manager don't use any other)
+		}
+
+	    } else {
+		print "no $manager->[0]\n";
+	    }
+	} # end of manager loop
+	
+	return 0;  
+    } # end of macos case
+    
+    elsif($^O eq 'linux') {
+	# The linux package managers generally ask for keyboard feedback (e.g. yum),
+	# so we have to spawn, exec, and wait to make sure the manager gets that feedback.
+
+	for my $manager( 'yum','apt-get' ) {
+	    print "Trying $manager...";
+	    my $l = `which $manager`;
+	    
+	    if($l) {
+		
+		my $pid = fork();
+		die "Couldn't fork!" unless(defined($pid));
+		
+		unless($pid) {
+		    ## daughter
+		    exec "$manager install gnuplot";
+		    
+		    exit(-1); # never get here
+		}
+		
+		waitpid($pid,0);  # wait for the install to finish
+		
+		my $msg;
+		eval q{ do q{lib/Alien/Gnuplot.pm}; $msg = $@ };
+		
+		if( (!$msg) and ($Alien::Gnuplot::version) ) {
+		    print "Success!\n";
+		    return 1;              # Success - return 1
+		} else {
+		    return 0;              # Failure - give up (once you find one package manager don't use any other)
+		}
+	    } # end of found-this-manager conditional
+	} # end of manager loop
+
+	return 0;
+    } # end of linux case
+    
+    else {
+	return 0;  ## We're not a system where we know how to do binary installs
+    }
+
+}
+
+
+
+##############################
+##############################
+## Write a generic Makefile that puts the module in place.  Include a postamble
+## that will also make the source code, if necessary.
 
 WriteMakefile(
     NAME                => 'Alien::Gnuplot',
@@ -82,87 +209,4 @@ WriteMakefile(
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'PDL-Graphics-Gnuplot-*' },
 	);
-
-################################################################################
-################################################################################
-## Here we check for a working gnuplot.  What better way to do that than by
-## executing our own library?  
-{
-    my $get_msg = '';
-
-    eval q{ do q{./lib/Alien/Gnuplot.pm}; $get_msg = $@;};
-    
-    unless($get_msg) {
-	if($Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION > $Alien::Gnuplot::version) {
-	    $get_msg = qq{
-Gnuplot seems to exist on your system, but it is version $Alien::Gnuplot::version.
-The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
-
-}
-	}
-
-	
-    }
-
-    if($get_msg) {
-	print $get_msg . q{
-Attempting to install/upgrade gnuplot on your system....
-
-};
-	install_gnuplot();
-    }
-}	
-
-##############################
-##############################
-## The pedal meets the metal here.
-##
-## The strategy is to try to get a late-model
-## binary from the Usual Suspects, and fall back
-## to compiling it.
-sub psn {
-    if($_[0]) {
-	print "Success!\n";
-    }else {
-	print "nope\n";
-    }
-}
-
-sub install_gnuplot {
-    local($|) = 1;
-
-    ##############################
-    # 
-    if($^O eq 'darwin') {
-      foo: {
-
-   	   ##############################
-	   # Binary distros - try macports, fink, homebrew
-	  for my $manager( ['macports','port','http://macports.org'],
-			['fink','fink','http://www.finkproject.org'],
-			['homebrew','brew','http://mxcl.github.com/homebrew/']
-	      ) {
-	      print "Trying $manager->[0] (you can get it at $manager->[2])...";
-	      my $l = `which $manager->[1]`;
-	      if($l) {
-		  print "\n";
-		  print STDERR `$manager->[1] install gnuplot`;
-		  my $msg;
-		  eval q{ do q{lib/Alien/Gnuplot.pm}; $msg = $@; } ;
-		  psn((!$msg) and ($Alien::Gnuplot::version));
-		  last foo unless($msg);
-	      } else {
-		  print "no $manager->[0]\n";
-	      }
-	  }
-
-	  die "No suitable package managers found! You'll have to get it yourself \n(from http://www.gnuplot.info).\n";
-	}
-    } 
-    else {
-	die "I don't know how to install gnuplot on a $^O system.  Please fix me!\n";
-    }
-}
-
-
 

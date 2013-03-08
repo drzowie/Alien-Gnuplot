@@ -58,6 +58,7 @@ if(exists $ARGV[0] && $ARGV[0] eq 'README.pod')
 ################################################################################
 ## Here we check for a working gnuplot.  What better way to do that than by
 ## executing our own library?  
+
 {
     my $get_msg = '';
 
@@ -82,12 +83,39 @@ Attempting to install/upgrade gnuplot on your system....
 	if( install_gnuplot_binary() ) {
 	    print "\nGnuplot installation was successful - not building from source.\n";
 	} else {
+	    my @tarballs = sort map { chomp $_; s/^src\///; $_ } (split /[\r\n]+/, `ls src/gnuplot-*.tar.gz`);
+	    my $tarball = $tarballs[$#tarballs];
+	    my $sourcedir = $tarball;
+	    $sourcedir =~ s/.tar.gz//;
 
-	    
+	    print qq{
+Couldn't install gnuplot from a package manager.  Will attempt to build from source.
 
-	}
-    }
-}	
+};
+	    *MY::postamble = sub {
+# Postamble sub -- generate and return text that gets tacked onto the end of the makefile.
+# This one adds a gnuplot dependency to pure_all (default make) and also adds function to 
+# do the actual compile and to install the resulting gnuplot.
+		my $text = <<"FOO";
+pure_all :: gnuplot
+
+gnuplot :: gnuplot_source
+	echo "Making $sourcedir from included source code...."
+	cd src/$sourcedir; ./configure
+	cd src/$sourcedir; make
+
+gnuplot_source : src/$tarball
+	cd src; rm -rf $sourcedir; tar xvfz $tarball
+
+install :: gnuplot
+	cd src/$sourcedir
+	make install
+FOO
+                return $text;
+	    }; # end of postamble sub definition
+	} # end of conditional 
+    } # end of get_msg condition
+} # end of convenience block	
 
 ##############################
 ##############################

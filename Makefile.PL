@@ -76,27 +76,40 @@ The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
     }
 
     if($get_msg) {
-	print $get_msg . q{
-Attempting to install/upgrade gnuplot on your system....
+	print $get_msg ;
 
-};
-	if( install_gnuplot_binary() ) {
-	    print "\nGnuplot installation was successful - not building from source.\n";
+	my $install_flag;
+
+	if( -t STDIN  or   $^O =~ m/MSWin/) {
+	    print "Gnuplot seems to not exist on your system.  Shall I try to install it? [Y/n]> ";
+	    $a = <STDIN>;
+	    $install_flag = !($a =~ m/^\s*n/i);
 	} else {
-	    my @tarballs = sort map { chomp $_; s/^src\///; $_ } (split /[\r\n]+/, `ls src/gnuplot-*.tar.gz`);
-	    my $tarball = $tarballs[$#tarballs];
-	    my $sourcedir = $tarball;
-	    $sourcedir =~ s/.tar.gz//;
+	    $install_flag = 1;
+	}
 
-	    print qq{
-Couldn't install gnuplot from a package manager.  Will attempt to build from source.
+	if($install_flag) {
+
+	    print "Attempting to install/upgrade gnuplot on your system....\n\n";
+
+	    if( install_gnuplot_binary() ) {
+		print "\nGnuplot installation was successful - not building from source.\n";
+	    } else {
+		my @tarballs = sort map { chomp $_; s/^src\///; $_ } (split /[\r\n]+/, `ls src/gnuplot-*.tar.gz`);
+		my $tarball = $tarballs[$#tarballs];
+		my $sourcedir = $tarball;
+		$sourcedir =~ s/.tar.gz//;
+		
+		print qq{
+Couldn't install gnuplot from a package manager.  Will attempt to build it 
+from source, when you build the package.
 
 };
-	    *MY::postamble = sub {
+		*MY::postamble = sub {
 # Postamble sub -- generate and return text that gets tacked onto the end of the makefile.
 # This one adds a gnuplot dependency to pure_all (default make) and also adds function to 
 # do the actual compile and to install the resulting gnuplot.
-		my $text = <<"FOO";
+		    my $text = <<"FOO";
 pure_all :: gnuplot
 
 gnuplot :: gnuplot_source
@@ -111,15 +124,18 @@ install :: gnuplot
 	cd src/$sourcedir
 	make install
 FOO
-                return $text;
-	    }; # end of postamble sub definition
-	} # end of conditional 
+                    return $text;
+		}; # end of postamble sub definition
+	    } # end of binary/source conditional 
+	} # end of prompt conditional
     } # end of get_msg condition
 } # end of convenience block	
 
 ##############################
 ##############################
-## The pedal meets the metal here.
+## 
+## install_gnuplot_binary routine -- called
+## from deep in the install conditional above.
 ##
 ## The strategy is to try to get a late-model
 ## binary from the Usual Suspects, and fall back

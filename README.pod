@@ -25,6 +25,11 @@ Alien::Gnuplot - Find and verify functionality of the gnuplot executable.
 
 =head1 DESCRIPTION
 
+NOTE: Alien::Gnuplot is currently experimental, with a 1.0 release
+planned for Spring 2013.  Please report your experience to
+craig@deforest.org.  Patches that work for your system are welcome and
+appreciated!
+
 As an Alien module, Alien::Gnuplot just verifies existence and sanity
 of the gnuplot executable.  It doesn't have any methods.  Using
 Alien::Gnuplot checks for existence of the executable, and also 
@@ -44,17 +49,31 @@ sets several global variables:
 
 =back
 
-You can point Alien::Gnuplot to a particular path for gnuplot, by setting the 
-environment variable GNUPLOT_BINARY to the path.
+You can point Alien::Gnuplot to a particular path for gnuplot, by
+setting the environment variable GNUPLOT_BINARY to the path.
 
-If there is no executable application in your path or in the location pointed
-to by GNUPLOT_BINARY, then the module throws an exception.  You can also verify that
-it has not completed successfully, by examining $Alien::Gnuplot::version, which is
-undefined in case of failure and contains the gnuplot version string on success.
+If there is no executable application in your path or in the location
+pointed to by GNUPLOT_BINARY, then the module throws an exception.
+You can also verify that it has not completed successfully, by
+examining $Alien::Gnuplot::version, which is undefined in case of
+failure and contains the gnuplot version string on success.
 
-=head1 SOURCE REPOSITORY
+=head1 INSTALLATION STRATEGY
 
-http://github.com/drzowie/Alien-Gnuplot
+Installation initial work is done by the Makefile.PL, which attempts
+to install gnuplot via common package managers on particular
+platforms.  If package management fails, Makefile.PL creates a script
+to generate a default install of the included gnuplot source code.
+(Downloading from the official Sourceforge repository would reduce
+load on CPAN, but it is impractical -- Sourceforge obfuscates download
+links in a way that confuses LWP and HTTP::Tiny).
+
+=head1 REPOSITORIES
+
+Alien::Gnuplot development is at "http://github.com/drzowie/Alien-Gnuplot".
+
+Gnuplot's main home page is at "http://www.gnuplot.info", and the source code
+tarball in src is downloaded from there.
 
 =head1 AUTHOR
 

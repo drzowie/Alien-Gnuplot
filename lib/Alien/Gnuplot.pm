@@ -18,6 +18,11 @@ Alien::Gnuplot - Find and verify functionality of the gnuplot executable.
 
 =head1 DESCRIPTION
 
+NOTE: Alien::Gnuplot is currently experimental, with a 1.0 release
+planned for Spring 2013.  Please report your experience to
+craig@deforest.org.  Patches that work for your system are welcome and
+appreciated!
+
 As an Alien module, Alien::Gnuplot just verifies existence and sanity
 of the gnuplot executable.  It doesn't have any methods.  Using
 Alien::Gnuplot checks for existence of the executable, and also 
@@ -88,7 +93,7 @@ use POSIX ":sys_wait_h";
 # overload the system VERSION to compare a required version against gnuplot itself, rather
 # than against eh module version.
 
-our $VERSION = '1.001';
+our $VERSION = '0.002';
 
 # On install, try to make sure at least this version is present.
 our $GNUPLOT_RECOMMENDED_VERSION = '4.6';  
@@ -155,7 +160,7 @@ my($pid);
 my ($undef, $file) = tempfile('gnuplot_test_XXXX');
 
 $pid = fork();
-if(!$pid) {
+if(defined($pid) and !$pid) {
     # daughter
     open STDOUT, ">$file";
     open STDERR, ">&STDOUT";

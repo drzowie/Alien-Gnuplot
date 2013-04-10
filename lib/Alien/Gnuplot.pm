@@ -181,7 +181,7 @@ elsif($pid>0) {
 
     if($pid) {
 	kill 9,$pid;   # zap
-	waitpid($pid); # reap
+	waitpid($pid,0); # reap
     }
 } else {
     die "Couldn't fork!";

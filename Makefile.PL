@@ -116,13 +116,15 @@ gnuplot :: gnuplot_source
 	echo "Making $sourcedir from included source code...."
 	cd src/$sourcedir; ./configure
 	cd src/$sourcedir; make
+	cp src/$sourcedir/src/gnuplot .
 
 gnuplot_source : src/$tarball
 	cd src; rm -rf $sourcedir; tar xvfz $tarball
+	touch gnuplot_source
 
 install :: gnuplot
-	cd src/$sourcedir
-	make install
+	cd src/$sourcedir; make install
+
 FOO
                     return $text;
 		}; # end of postamble sub definition
@@ -164,7 +166,7 @@ sub install_gnuplot_binary {
 		my $msg;
 		eval q{ do q{lib/Alien/Gnuplot.pm}; $msg = $@; } ;
 		
-		if( ((!$msg) and ($Alien::Gnuplot::version))) {
+		if( (!$msg) and ($Alien::Gnuplot::version >= $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION)) {
 		    print "Success!\n";
 		    return 1;               # Success - return 1
 		} else {
@@ -204,10 +206,11 @@ sub install_gnuplot_binary {
 		my $msg;
 		eval q{ do q{lib/Alien/Gnuplot.pm}; $msg = $@ };
 		
-		if( (!$msg) and ($Alien::Gnuplot::version) ) {
+		if( (!$msg) and ($Alien::Gnuplot::version >= $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION) ) {
 		    print "Success!\n";
 		    return 1;              # Success - return 1
 		} else {
+		    print "Hmmm, that didn't seem to work.\n";
 		    return 0;              # Failure - give up (once you find one package manager don't use any other)
 		}
 	    } # end of found-this-manager conditional
@@ -251,6 +254,6 @@ WriteMakefile(
     },		  
 
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'PDL-Graphics-Gnuplot-*' },
+    clean               => { FILES => 'Alien-Gnuplot-* src/*[0-9]' },
 	);
 

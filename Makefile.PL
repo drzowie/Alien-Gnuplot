@@ -100,35 +100,14 @@ The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
 		my $sourcedir = $tarball;
 		$sourcedir =~ s/.tar.gz//;
 		
-		print qq{
-Couldn't install gnuplot from a package manager.  Will attempt to build it 
-from source, when you build the package.
+		die qq{
+Couldn't find gnuplot, and couldn't get it from the standard package managers.
+I'd try to download the packages from sourceforge, but there are roadblocks that
+make it hard to automate.  
 
+You can get gnuplot from the DOWNLOAD link here: "http://gnuplot.info". 
 };
-		*MY::postamble = sub {
-# Postamble sub -- generate and return text that gets tacked onto the end of the makefile.
-# This one adds a gnuplot dependency to pure_all (default make) and also adds function to 
-# do the actual compile and to install the resulting gnuplot.
-		    my $text = <<"FOO";
-pure_all :: gnuplot
-
-gnuplot :: gnuplot_source
-	echo "Making $sourcedir from included source code...."
-	cd src/$sourcedir; ./configure
-	cd src/$sourcedir; make
-	cp src/$sourcedir/src/gnuplot .
-
-gnuplot_source : src/$tarball
-	cd src; rm -rf $sourcedir; tar xvfz $tarball
-	touch gnuplot_source
-
-install :: gnuplot
-	cd src/$sourcedir; make install
-
-FOO
-                    return $text;
-		}; # end of postamble sub definition
-	    } # end of binary/source conditional 
+	    } # end of binary conditional 
 	} # end of prompt conditional
     } # end of get_msg condition
 } # end of convenience block	

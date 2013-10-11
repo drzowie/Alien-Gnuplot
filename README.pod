@@ -25,15 +25,10 @@ Alien::Gnuplot - Find and verify functionality of the gnuplot executable.
 
 =head1 DESCRIPTION
 
-NOTE: Alien::Gnuplot is currently experimental, with a 1.0 release
-planned for Spring 2013.  Please report your experience to
-craig@deforest.org.  Patches that work for your system are welcome and
-appreciated!
-
-As an Alien module, Alien::Gnuplot just verifies existence and sanity
-of the gnuplot executable.  It doesn't have any methods.  Using
-Alien::Gnuplot checks for existence of the executable, and also 
-sets several global variables:
+Alien::Gnuplot verifies existence and sanity of the gnuplot external
+application.  It doesn't have any methods - actually using gnuplot is
+up to you.  Using Alien::Gnuplot checks for existence of the
+executable, and sets several global variables:
 
 =over 3
 
@@ -60,13 +55,15 @@ failure and contains the gnuplot version string on success.
 
 =head1 INSTALLATION STRATEGY
 
-Installation initial work is done by the Makefile.PL, which attempts
-to install gnuplot via common package managers on particular
-platforms.  If package management fails, Makefile.PL creates a script
-to generate a default install of the included gnuplot source code.
-(Downloading from the official Sourceforge repository would reduce
-load on CPAN, but it is impractical -- Sourceforge obfuscates download
-links in a way that confuses LWP and HTTP::Tiny).
+When you install Alien::Gnuplot, it checks that gnuplot itself is
+installed as well.  If it is not, then Alien::Gnuplot attempts to 
+use one of several common package managers to install gnuplot for you.
+If it can't find one of those, if dies (and refuses to install), printing
+a friendly message about how to get gnuplot before throwing an error.
+
+In principle, gnuplot could be automagically downloaded and built, 
+but it is distributed via Sourceforge -- which obfuscates interior
+links, making such tools surprisingly difficult to write.
 
 =head1 REPOSITORIES
 

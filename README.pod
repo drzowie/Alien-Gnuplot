@@ -26,9 +26,14 @@ Alien::Gnuplot - Find and verify functionality of the gnuplot executable.
 =head1 DESCRIPTION
 
 Alien::Gnuplot verifies existence and sanity of the gnuplot external
-application.  It doesn't have any methods - actually using gnuplot is
-up to you.  Using Alien::Gnuplot checks for existence of the
-executable, and sets several global variables:
+application.  It only declares one access method,
+C<Alien::Gnuplot::load_gnuplot>, which does the actual work and is
+called automatically at load time.  Alien::Gnuplot doesn't have any
+actual plotting methods - making use of gnuplot, once it is found and
+verified, is up to you or your client module.
+
+Using Alien::Gnuplot checks for existence of the executable, and sets
+several global variables:
 
 =over 3
 
@@ -42,6 +47,10 @@ executable, and sets several global variables:
 
 =item * C<%Alien::Gnuplot::terms> gets a key for each supported terminal device; values are the 1-line description from gnuplot.
 
+=item * C<@Alien::Gnuplot::colors> gets a list of the names of all named colors recognized by this gnuplot.
+
+=item * C<%Alien::Gnuplot::colors> gets a key for each named color; values are the C<#RRGGBB> form of the color.
+
 =back
 
 You can point Alien::Gnuplot to a particular path for gnuplot, by
@@ -52,6 +61,11 @@ pointed to by GNUPLOT_BINARY, then the module throws an exception.
 You can also verify that it has not completed successfully, by
 examining $Alien::Gnuplot::version, which is undefined in case of
 failure and contains the gnuplot version string on success.
+
+If you think the global state of the gnuplot executable may have
+changed, you can either reload the module or explicitly call
+C<Alien::Gnuplot::load_gnuplot()> to force a fresh inspection of
+the executable.
 
 =head1 INSTALLATION STRATEGY
 

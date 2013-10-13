@@ -106,7 +106,7 @@ use POSIX ":sys_wait_h";
 # overload the system VERSION to compare a required version against gnuplot itself, rather
 # than against the module version.
 
-our $VERSION = '1.004';
+our $VERSION = '1.004_001';
 
 # On install, try to make sure at least this version is present.
 our $GNUPLOT_RECOMMENDED_VERSION = '4.6';  
@@ -162,8 +162,6 @@ it yourself from L<http://www.gnuplot.info>.
 };
     }
     
-    print "Trying $exec_path...\n";
-
 ##############################
 # Execute the executable to make sure it's really gnuplot, and parse
 # out its reported version.  This is complicated by gnuplot's shenanigans
@@ -177,28 +175,35 @@ it yourself from L<http://www.gnuplot.info>.
     if(defined($pid)) {
 	if(!$pid) {
 	    # daughter
+	    open BAR, ">&STDERR"; # preserve stderr
 	    eval { 
 		open STDOUT, ">$file";
 		open STDERR, ">&STDOUT";
-		open FOO, "|$exec_path";
+		open FOO, ">${file}_gzinta";
 		print FOO "show version\nset terminal\n\n\n\n\n\n\n\n\n\nprint \"CcColors\"\nshow colornames\n\n\n\n\n\n\n\nprint \"FfFinished\"n";
 		close FOO;
-		exit(0);
+		open STDIN, "<${file}_gzinta";
+		exec($exec_path);
+		print BAR "Execution of $exec_path failed!\n";
+		exit(1);
 	    }; 
-	    print STDERR "Alien::Gnuplot: problems spawning '$exec_path' to probe gnuplot.\n";
-	    exit(1); # there was a problem!
+	    print STDERR "Alien::Gnuplot: Unknown problems spawning '$exec_path' to probe gnuplot.\n";
+	    exit(2); # there was a problem!
 	} else {
 	    # parent
-	    # Poll for 2 seconds, cheesily.
+	    print "waiting for pseudoprocess $pid (up to 20 iterations of 100ms)"; flush STDOUT;
 	    for (1..20) {
+		print "."; flush STDOUT;
 		if(waitpid($pid,WNOHANG)) {
 		    $pid=0;
 		    last;
 		}
 		usleep(1e5);
 	    }
+	    print "\n";
 	    
 	    if($pid) {
+		print "gnuplot didn't complete.  Killing it dead...\n";
 		kill 9,$pid;   # zap
 		waitpid($pid,0); # reap
 	    }

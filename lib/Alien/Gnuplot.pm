@@ -106,7 +106,7 @@ use POSIX ":sys_wait_h";
 # overload the system VERSION to compare a required version against gnuplot itself, rather
 # than against the module version.
 
-our $VERSION = '1.004_001';
+our $VERSION = '1.005';
 
 # On install, try to make sure at least this version is present.
 our $GNUPLOT_RECOMMENDED_VERSION = '4.6';  
@@ -218,6 +218,7 @@ it yourself from L<http://www.gnuplot.info>.
     open FOO, "<$file";
     my @lines = <FOO>;
     unlink $file;
+    unlink $file."_gzinta";
     
 ##############################
 # Whew.  Now parse out the 'GNUPLOT' and version number...

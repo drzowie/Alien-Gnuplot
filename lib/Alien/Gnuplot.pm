@@ -96,6 +96,7 @@ package Alien::Gnuplot;
 
 use strict;
 
+use File::Spec;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/usleep/;
 use POSIX ":sys_wait_h";
@@ -104,8 +105,7 @@ use POSIX ":sys_wait_h";
 # overload the system VERSION to compare a required version against gnuplot itself, rather
 # than against the module version.
 
-our $VERSION = '1.002';
-print STDERR "Loading Alien::Gnuplot v$VERSION\n";
+our $VERSION = '1.004';
 
 # On install, try to make sure at least this version is present.
 our $GNUPLOT_RECOMMENDED_VERSION = '4.6';  
@@ -142,15 +142,12 @@ sub load_gnuplot {
 	$exec_path = $ENV{'GNUPLOT_BINARY'};
     } else {
 	my $exec_str = "gnuplot";
-	if( defined($ENV{'PATH'}) ) {
-	    # POSIX path present...
-	    my @path = split (/\:/,$ENV{'PATH'});
-	    for my $dir(@path) {
-		$exec_path = "$dir/$exec_str";
-		last if( -x $exec_path );
-	    }
-	} else {
-	    die "Alien::Gnuplot: No POSIX-style path found, and no GNUPLOT_BINARY environment\nvariable found either\n\n";
+	my @path = File::Spec->path();
+	for my $dir(@path) {
+	    $exec_path = File::Spec->catfile( $dir, $exec_str );
+	    last if( -x $exec_path );
+	    $exec_path .= ".exe";
+	    last if( -x $exec_path );
 	}
     }
     
@@ -164,7 +161,8 @@ it yourself from L<http://www.gnuplot.info>.
 };
     }
     
-    
+    print "Trying $exec_path...\n";
+
 ##############################
 # Execute the executable to make sure it's really gnuplot, and parse
 # out its reported version.  This is complicated by gnuplot's shenanigans
@@ -175,47 +173,53 @@ it yourself from L<http://www.gnuplot.info>.
     my ($undef, $file) = tempfile('gnuplot_test_XXXX');
     
     $pid = fork();
-    if(defined($pid) and !$pid) {
-	# daughter
-	open STDOUT, ">$file";
-	open STDERR, ">&STDOUT";
-	open FOO, "|$exec_path";
-	print FOO "show version\nset terminal\n\n\n\n\n\n\n\n\n\nprint \"CcColors\"\nshow colornames\n\n\n\n\n\n\n\nprint \"FfFinished\"n";
-	close FOO;
-	exit(0);
-    }
-    elsif(defined($pid)) {
-	# Poll for 2 seconds, cheesily.
-	for (1..20) {
-	    if(waitpid($pid,WNOHANG)) {
-		$pid=0;
-		last;
+    if(defined($pid)) {
+	if(!$pid) {
+	    # daughter
+	    eval { 
+		open STDOUT, ">$file";
+		open STDERR, ">&STDOUT";
+		open FOO, "|$exec_path";
+		print FOO "show version\nset terminal\n\n\n\n\n\n\n\n\n\nprint \"CcColors\"\nshow colornames\n\n\n\n\n\n\n\nprint \"FfFinished\"n";
+		close FOO;
+		exit(0);
+	    }; 
+	    print STDERR "Alien::Gnuplot: problems spawning '$exec_path' to probe gnuplot.\n";
+	    exit(1); # there was a problem!
+	} else {
+	    # parent
+	    # Poll for 2 seconds, cheesily.
+	    for (1..20) {
+		if(waitpid($pid,WNOHANG)) {
+		    $pid=0;
+		    last;
+		}
+		usleep(1e5);
 	    }
-	    usleep(1e5);
-	}
-	
-	if($pid) {
-	    kill 9,$pid;   # zap
-	    waitpid($pid,0); # reap
+	    
+	    if($pid) {
+		kill 9,$pid;   # zap
+		waitpid($pid,0); # reap
+	    }
 	}
     } else {
-	die "Alien::Gnuplot: Couldn't fork to test gnuplot! (fork returned '$pid')\n";
+	# fork returned undef - error.
+	die "Alien::Gnuplot: Couldn't fork to test gnuplot! ($@)\n";
     }
-    
+
 ##############################
 # Read what gnuplot had to say, and clean up our mess...
     open FOO, "<$file";
     my @lines = <FOO>;
     unlink $file;
     
-    
 ##############################
 # Whew.  Now parse out the 'GNUPLOT' and version number...
     my $lines = join("", map { chomp $_; $_} @lines);
     $lines =~ s/\s+G N U P L O T\s*//  or  die qq{
-Alien::Gnuplot: the executable file $exec_path appears not to be gnuplot!  You can 
-remove it or set your GNUPLOT_BINARY variable to an actual gnuplot.
-
+Alien::Gnuplot: the executable '$exec_path' appears not to be gnuplot,
+or perhaps there was a problem running it.  You can remove it or set
+your GNUPLOT_BINARY variable to an actual gnuplot.
 };
     
     $lines =~ m/Version (\d+\.\d+) (patchlevel (\d+))?/ or die qq{
@@ -227,7 +231,6 @@ I could not parse a verion number from its output.  Sorry, I give up.
     $version = $1;
     $pl = $3;
     $executable = $exec_path;
-    
     
 ##############################
 # Parse out available terminals and put them into the 

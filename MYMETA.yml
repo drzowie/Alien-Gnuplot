@@ -18,6 +18,7 @@ no_index:
     - t
     - inc
 requires:
+  File::Spec: 0
   File::Temp: 0
   HTTP::Tiny: 0
   POSIX: 0
@@ -25,4 +26,4 @@ requires:
 resources:
   homepage: http://github.com/drzowie/Alien-Gnuplot
   repository: git://github.com/drzowie/Alien-Gnuplot.git
-version: 1.002
+version: 1.004

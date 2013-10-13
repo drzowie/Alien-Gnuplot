@@ -221,8 +221,10 @@ WriteMakefile(
      : ()),
     PREREQ_PM => { 'Time::HiRes' => 0,
 		   'File::Temp'  => 0,
-		   'HTTP::Tiny' => 0,
-		   'POSIX'       => 0
+		   'HTTP::Tiny'  => 0,
+		   'POSIX'       => 0,
+		   'File::Spec'  => 0
+		       
     },
     META_ADD => {
 	resources => {

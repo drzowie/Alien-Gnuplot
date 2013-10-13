@@ -47,7 +47,8 @@ several global variables:
 =back
 
 You can point Alien::Gnuplot to a particular path for gnuplot, by
-setting the environment variable GNUPLOT_BINARY to the path.
+setting the environment variable GNUPLOT_BINARY to the path.  Otherwise
+your path will be searched (using File::Spec) for the executable file.
 
 If there is no executable application in your path or in the location
 pointed to by GNUPLOT_BINARY, then the module throws an exception.

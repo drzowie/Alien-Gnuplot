@@ -184,7 +184,7 @@ it yourself from L<http://www.gnuplot.info>.
 	close FOO;
 	exit(0);
     }
-    elsif($pid>0) {
+    elsif(defined($pid)) {
 	# Poll for 2 seconds, cheesily.
 	for (1..20) {
 	    if(waitpid($pid,WNOHANG)) {
@@ -199,7 +199,7 @@ it yourself from L<http://www.gnuplot.info>.
 	    waitpid($pid,0); # reap
 	}
     } else {
-	die "Couldn't fork!";
+	die "Alien::Gnuplot: Couldn't fork to test gnuplot! (fork returned '$pid')\n";
     }
     
 ##############################

@@ -107,7 +107,7 @@ use POSIX ":sys_wait_h";
 # overload the system VERSION to compare a required version against gnuplot itself, rather
 # than against the module version.
 
-our $VERSION = '1.006';
+our $VERSION = '1.007';
 
 # On install, try to make sure at least this version is present.
 our $GNUPLOT_RECOMMENDED_VERSION = '4.6';  
@@ -171,34 +171,45 @@ it yourself from L<http://www.gnuplot.info>.
 # kills it dead.
     my($pid);
     my ($undef, $file) = tempfile('gnuplot_test_XXXX');
-    
-    $pid = fork();
-    if(defined($pid)) {
-	if(!$pid) {
-	    # daughter
-	    open BAR, ">&STDERR"; # preserve stderr
-	    eval { 
-		open STDOUT, ">$file";
-		open STDERR, ">&STDOUT";
-		open FOO, ">${file}_gzinta";
-		print FOO "show version\nset terminal\n\n\n\n\n\n\n\n\n\nprint \"CcColors\"\nshow colornames\n\n\n\n\n\n\n\nprint \"FfFinished\"\nexit\n";
-		close FOO;
-		open STDIN, "<${file}_gzinta";
-		exec($exec_path);
-		print BAR "Execution of $exec_path failed!\n";
-		exit(1);
-	    }; 
-	    print STDERR "Alien::Gnuplot: Unknown problems spawning '$exec_path' to probe gnuplot.\n";
-	    exit(2); # there was a problem!
-	} else {
-	    # parent
-	    if($^O =~ m/MSWin32/i) {
-		# Microsoft Windows sucks at IPC (and many other things), so just do it the 
-		# stoopid way, and wait for the pseudoprocess to complete. This opens us up 
-		# to hangs, but if you cared you'd use a real OS instead.
-		if($DEBUG) { print "Microsoft Windows - just waiting for gnuplot to finish\n"; flush STDOUT; }
-		waitpid($pid,0);
+
+    # Create command file
+    open FOO, ">${file}_gzinta";
+    print FOO "show version\nset terminal\n\n\n\n\n\n\n\n\n\nprint \"CcColors\"\nshow colornames\n\n\n\n\n\n\n\nprint \"FfFinished\"\nexit\n";
+    close FOO;
+
+
+    if($^O =~ /MSWin32/i) {
+	# Microsoft Windows sucks at IPC (and many other things), so
+	# use "system" instead of civilized fork/exec.
+	# This leaves us vulnerable to gnuplot itself hanging, but 
+	# sidesteps the problem of waitpid hanging on Strawberry Perl.
+	open FOO, ">&STDOUT";
+	open BAR, ">&STDERR";
+	open STDOUT,">$file";
+	open STDERR,">$file";
+	system("$exec_path <${file}_gzinta");
+	open STDOUT,">&FOO";
+	open STDERR,">&BAR";
+	close FOO;
+	close BAR;
+    } else {
+	$pid = fork();
+	if(defined($pid)) {
+	    if(!$pid) {
+		# daughter
+		open BAR, ">&STDERR"; # preserve stderr
+		eval { 
+		    open STDOUT, ">$file";
+		    open STDERR, ">&STDOUT";
+		    open STDIN, "<${file}_gzinta";
+		    exec($exec_path);
+		    print BAR "Execution of $exec_path failed!\n";
+		    exit(1);
+		}; 
+		print STDERR "Alien::Gnuplot: Unknown problems spawning '$exec_path' to probe gnuplot.\n";
+		exit(2); # there was a problem!
 	    } else {
+		# parent
 		# Assume we're more POSIX-compliant...
 		if($DEBUG) { print "waiting for pid $pid (up to 20 iterations of 100ms)"; flush STDOUT; }
 		for (1..20) {
@@ -216,13 +227,13 @@ it yourself from L<http://www.gnuplot.info>.
 		    kill 9,$pid;   # zap
 		    waitpid($pid,0); # reap
 		}
-	    }
+	    } #end of parent case
+	} else {
+	    # fork returned undef - error.
+	    die "Alien::Gnuplot: Couldn't fork to test gnuplot! ($@)\n";
 	}
-    } else {
-	# fork returned undef - error.
-	die "Alien::Gnuplot: Couldn't fork to test gnuplot! ($@)\n";
     }
-
+    
 ##############################
 # Read what gnuplot had to say, and clean up our mess...
     open FOO, "<$file";

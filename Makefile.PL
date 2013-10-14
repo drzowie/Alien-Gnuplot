@@ -93,13 +93,8 @@ The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
 	    print "Attempting to install/upgrade gnuplot on your system....\n\n";
 
 	    if( install_gnuplot_binary() ) {
-		print "\nGnuplot installation was successful - not building from source.\n";
+		print "\nGnuplot installation was successful!\n";
 	    } else {
-		my @tarballs = sort map { chomp $_; s/^src\///; $_ } (split /[\r\n]+/, `ls src/gnuplot-*.tar.gz`);
-		my $tarball = $tarballs[$#tarballs];
-		my $sourcedir = $tarball;
-		$sourcedir =~ s/.tar.gz//;
-		
 		die qq{
 Couldn't find gnuplot, and couldn't get it from the standard package managers.
 I'd try to download the packages from sourceforge, but there are roadblocks that

@@ -96,6 +96,7 @@ it under the same terms as Perl itself.
 package Alien::Gnuplot;
 
 use strict;
+our $DEBUG = 1;
 
 use File::Spec;
 use File::Temp qw/tempfile/;
@@ -191,21 +192,30 @@ it yourself from L<http://www.gnuplot.info>.
 	    exit(2); # there was a problem!
 	} else {
 	    # parent
-	    print "waiting for pseudoprocess $pid (up to 20 iterations of 100ms)"; flush STDOUT;
-	    for (1..20) {
-		print "."; flush STDOUT;
-		if(waitpid($pid,WNOHANG)) {
-		    $pid=0;
-		    last;
+	    if($^O =~ m/MSWin32/i) {
+		# Microsoft Windows sucks at IPC (and many other things), so just do it the 
+		# stoopid way, and wait for the pseudoprocess to complete. This opens us up 
+		# to hangs, but if you cared you'd use a real OS instead.
+		if($DEBUG) { print "Microsoft Windows - just waiting for gnuplot to finish\n"; flush STDOUT; }
+		waitpid($pid,0);
+	    } else {
+		# Assume we're more POSIX-compliant...
+		if($DEBUG) { print "waiting for pseudoprocess $pid (up to 20 iterations of 100ms)"; flush STDOUT; }
+		for (1..20) {
+		    if($DEBUG) { print "."; flush STDOUT; }
+		    if(waitpid($pid,WNOHANG)) {
+			$pid=0;
+			last;
+		    }
+		    usleep(1e5);
 		}
-		usleep(1e5);
-	    }
-	    print "\n";
-	    
-	    if($pid) {
-		print "gnuplot didn't complete.  Killing it dead...\n";
-		kill 9,$pid;   # zap
-		waitpid($pid,0); # reap
+		if($DEBUG) { print "\n"; flush STDOUT; }
+		
+		if($pid) {
+		    if( $DEBUG) { print "gnuplot didn't complete.  Killing it dead...\n"; flush STDOUT; }
+		    kill 9,$pid;   # zap
+		    waitpid($pid,0); # reap
+		}
 	    }
 	}
     } else {

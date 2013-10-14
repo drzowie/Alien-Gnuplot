@@ -4,7 +4,7 @@
       "Craig DeForest <craig@deforest.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "ExtUtils::MakeMaker version 6.64, CPAN::Meta::Converter version 2.120630",
+   "generated_by" : "ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120630",
    "license" : [
       "perl_5"
    ],
@@ -47,5 +47,5 @@
          "url" : "git://github.com/drzowie/Alien-Gnuplot.git"
       }
    },
-   "version" : "1.005"
+   "version" : "1.006"
 }

@@ -107,7 +107,7 @@ use POSIX ":sys_wait_h";
 # overload the system VERSION to compare a required version against gnuplot itself, rather
 # than against the module version.
 
-our $VERSION = '1.005';
+our $VERSION = '1.006';
 
 # On install, try to make sure at least this version is present.
 our $GNUPLOT_RECOMMENDED_VERSION = '4.6';  
@@ -181,7 +181,7 @@ it yourself from L<http://www.gnuplot.info>.
 		open STDOUT, ">$file";
 		open STDERR, ">&STDOUT";
 		open FOO, ">${file}_gzinta";
-		print FOO "show version\nset terminal\n\n\n\n\n\n\n\n\n\nprint \"CcColors\"\nshow colornames\n\n\n\n\n\n\n\nprint \"FfFinished\"n";
+		print FOO "show version\nset terminal\n\n\n\n\n\n\n\n\n\nprint \"CcColors\"\nshow colornames\n\n\n\n\n\n\n\nprint \"FfFinished\"\nexit\n";
 		close FOO;
 		open STDIN, "<${file}_gzinta";
 		exec($exec_path);
@@ -200,7 +200,7 @@ it yourself from L<http://www.gnuplot.info>.
 		waitpid($pid,0);
 	    } else {
 		# Assume we're more POSIX-compliant...
-		if($DEBUG) { print "waiting for pseudoprocess $pid (up to 20 iterations of 100ms)"; flush STDOUT; }
+		if($DEBUG) { print "waiting for pid $pid (up to 20 iterations of 100ms)"; flush STDOUT; }
 		for (1..20) {
 		    if($DEBUG) { print "."; flush STDOUT; }
 		    if(waitpid($pid,WNOHANG)) {

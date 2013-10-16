@@ -96,7 +96,7 @@ it under the same terms as Perl itself.
 package Alien::Gnuplot;
 
 use strict;
-our $DEBUG = 1;
+our $DEBUG = 0; # set to 1 for some debugging output
 
 use File::Spec;
 use File::Temp qw/tempfile/;
@@ -107,7 +107,7 @@ use POSIX ":sys_wait_h";
 # overload the system VERSION to compare a required version against gnuplot itself, rather
 # than against the module version.
 
-our $VERSION = '1.007';
+our $VERSION = '1.008';
 
 # On install, try to make sure at least this version is present.
 our $GNUPLOT_RECOMMENDED_VERSION = '4.6';  
@@ -177,8 +177,12 @@ it yourself from L<http://www.gnuplot.info>.
     print FOO "show version\nset terminal\n\n\n\n\n\n\n\n\n\nprint \"CcColors\"\nshow colornames\n\n\n\n\n\n\n\nprint \"FfFinished\"\nexit\n";
     close FOO;
 
-
     if($^O =~ /MSWin32/i) {
+
+	if( $exec_path =~ m/([\"\:\*\?\<\>\|])/ ) {
+	    die "Alien::Gnuplot: Invalid character '$1' in path to gnuplot -- I give up" ;
+	}
+	
 	# Microsoft Windows sucks at IPC (and many other things), so
 	# use "system" instead of civilized fork/exec.
 	# This leaves us vulnerable to gnuplot itself hanging, but 
@@ -187,7 +191,7 @@ it yourself from L<http://www.gnuplot.info>.
 	open BAR, ">&STDERR";
 	open STDOUT,">$file";
 	open STDERR,">$file";
-	system("$exec_path <${file}_gzinta");
+	system(qq{"$exec_path" < ${file}_gzinta});
 	open STDOUT,">&FOO";
 	open STDERR,">&BAR";
 	close FOO;

@@ -32,24 +32,43 @@ called automatically at load time.  Alien::Gnuplot doesn't have any
 actual plotting methods - making use of gnuplot, once it is found and
 verified, is up to you or your client module.
 
-Using Alien::Gnuplot checks for existence of the executable, and sets
-several global variables:
+Using Alien::Gnuplot checks for existence of the executable, verifies
+that it runs properly, and sets several global variables to describe
+the properties of the gnuplot it found:
 
 =over 3
 
-=item * C<$Alien::Gnuplot::executable> gets the path to the executable that was found.
+=item * C<$Alien::Gnuplot::executable> 
 
-=item * C<$Alien::Gnuplot::version> gets the self-reported version number of the executable.
+gets the path to the gnuplot executable.
 
-=item * C<$Alien::Gnuplot::pl> gets the self-reported patch level.
+=item * C<$Alien::Gnuplot::version> 
 
-=item * C<@Alien::Gnuplot::terms> gets a list of the names of all supported terminal devices
+gets the self-reported version number of the executable.
 
-=item * C<%Alien::Gnuplot::terms> gets a key for each supported terminal device; values are the 1-line description from gnuplot.
+=item * C<$Alien::Gnuplot::pl> 
 
-=item * C<@Alien::Gnuplot::colors> gets a list of the names of all named colors recognized by this gnuplot.
+gets the self-reported patch level.
 
-=item * C<%Alien::Gnuplot::colors> gets a key for each named color; values are the C<#RRGGBB> form of the color.
+=item * C<@Alien::Gnuplot::terms> 
+
+gets a list of the names of all supported terminal devices.
+
+=item * C<%Alien::Gnuplot::terms> 
+
+gets a key for each supported terminal device; values are the 1-line
+description from gnuplot.  This is useful for testing whether a
+particular terminal is supported.
+
+=item * C<@Alien::Gnuplot::colors> 
+
+gets a list of the names of all named colors recognized by this gnuplot.
+
+=item * C<%Alien::Gnuplot::colors> 
+
+gets a key for each named color; values are the C<#RRGGBB> form of the color.
+This is useful for decoding colors, or for checking whether a particular color
+name is recognized.  All the color names are lowercase alphanumeric.
 
 =back
 
@@ -80,20 +99,34 @@ In principle, gnuplot could be automagically downloaded and built,
 but it is distributed via Sourceforge -- which obfuscates interior
 links, making such tools surprisingly difficult to write.
 
+=head1 CROSS-PLATFORM BEHAVIOR
+
+On POSIX systems, including Linux and MacOS, Alien::Gnuplot uses
+fork/exec to invoke the gnuplot executable and asynchronously monitor
+it for hangs.  Microsoft Windows process control is more difficult, so
+if $^O contains "MSWin32", a simpler system call is used, that is
+riskier -- it involves waiting for the unknown executable to complete.
+
 =head1 REPOSITORIES
 
-Alien::Gnuplot development is at "http://github.com/drzowie/Alien-Gnuplot".
+Gnuplot's main home page is at L<http://www.gnuplot.info>.
 
-Gnuplot's main home page is at "http://www.gnuplot.info", and the source code
-tarball in src is downloaded from there.
+Alien::Gnuplot development is at L<http://github.com/drzowie/Alien-Gnuplot>.
+
+A major client module for Alien::Gnuplot is PDL::Graphics::Gnuplot, which
+can be found at L<http://github.com/drzowie/PDL-Graphics-Gnuplot>.
+PDL is at L<http://pdl.perl.org>.
 
 =head1 AUTHOR
 
 Craig DeForest <craig@deforest.org>
 
+(with special thanks to Chris Marshall, Juergen Mueck, and
+Sisyphus for testing and debugging on the Microsoft platform)
+
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013 by Craig DeForest
+Copyright (C) 2013 Craig DeForest
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

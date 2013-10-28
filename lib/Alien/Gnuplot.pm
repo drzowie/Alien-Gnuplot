@@ -289,7 +289,7 @@ your GNUPLOT_BINARY variable to an actual gnuplot.
     
     $lines =~ m/Version (\d+\.\d+) (patchlevel (\d+))?/ or die qq{
 Alien::Gnuplot: the executable file $exec_path claims to be gnuplot, but 
-I could not parse a verion number from its output.  Sorry, I give up.
+I could not parse a version number from its output.  Sorry, I give up.
 
 };
     

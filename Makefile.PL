@@ -80,12 +80,35 @@ The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
 
 	my $install_flag;
 
-	if( -t STDIN  or   $^O =~ m/MSWin/) {
-	    print "Gnuplot seems to not exist on your system.  Shall I try to install it? [Y/n]> ";
+	if( (-t STDIN  or $^O =~ m/MSWin/) and !($ENV{AUTOMATED_TESTING}) ) {
+	    if($ENV{AUTOMATED_TESTING}) {
+		
+	    }
+	    print "\nGnuplot seems to not exist on your system.  Shall I try to install it? [Y/n]> ";
 	    $a = <STDIN>;
 	    $install_flag = !($a =~ m/^\s*n/i);
+	    
+	    unless($install_flag) {
+		print qq{
+
+Okay, I won't install gnuplot. You can still install the Alien::Gnuplot module,
+but it will fail on load until you install the gnuplot executable yourself.
+
+};
+	    }
+
 	} else {
-	    $install_flag = 1;
+	    if($ENV{PERL_MM_USE_DEFAULT}) {
+		$install_flag = 1;
+	    } else {
+		print qq{
+
+Gnuplot seems to not exist on your system, and this is not an interactive 
+session, so I can't ask if you want to install it.  I'll install the module,
+but it'll fail on load until you install the gnuplot executable yourself.
+
+};
+	    }
 	}
 
 	if($install_flag) {
@@ -96,11 +119,13 @@ The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
 		print "\nGnuplot installation was successful!\n";
 	    } else {
 		die qq{
+
 Couldn't find gnuplot, and couldn't get it from the standard package managers.
 I'd try to download the packages from sourceforge, but there are roadblocks that
 make it hard to automate.  
 
 You can get gnuplot from the DOWNLOAD link here: "http://gnuplot.info". 
+
 };
 	    } # end of binary conditional 
 	} # end of prompt conditional

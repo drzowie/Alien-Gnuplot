@@ -80,10 +80,10 @@ The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
 
 	my $install_flag;
 
-	if( (-t STDIN  or $^O =~ m/MSWin/) and !($ENV{AUTOMATED_TESTING}) ) {
-	    if($ENV{AUTOMATED_TESTING}) {
-		
-	    }
+	if( (-t STDIN  or $^O =~ m/MSWin/) and 
+	      ! (  $ENV{AUTOMATED_TESTING} or $ENV{PERL_MM_USE_DEFAULT}  ) 
+	    ) {
+
 	    print "\nGnuplot seems to not exist on your system.  Shall I try to install it? [Y/n]> ";
 	    $a = <STDIN>;
 	    $install_flag = !($a =~ m/^\s*n/i);
@@ -98,8 +98,15 @@ but it will fail on load until you install the gnuplot executable yourself.
 	    }
 
 	} else {
+
 	    if($ENV{PERL_MM_USE_DEFAULT}) {
 		$install_flag = 1;
+		print qq{
+
+Gnuplot seems to not exist oon your system, and you set PERL_MM_USE_DEFAULT --
+so I'll try to install it for you.
+
+};
 	    } else {
 		print qq{
 

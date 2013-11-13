@@ -1,0 +1,9 @@
+Revision history for Alien-Gnuplot
+
+1.030	 2013-11-13
+
+   - switch tempfile() call to no-arguments version, to ensure /tmp is used in POSIX systems
+
+1.020    2013-10-28
+
+   - fixes to Microsoft Windows support

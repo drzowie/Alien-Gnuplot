@@ -140,7 +140,7 @@ use POSIX ":sys_wait_h";
 # overload the system VERSION to compare a required version against gnuplot itself, rather
 # than against the module version.
 
-our $VERSION = '1.020';
+our $VERSION = '1.030';
 
 # On install, try to make sure at least this version is present.
 our $GNUPLOT_RECOMMENDED_VERSION = '4.6';  
@@ -203,7 +203,7 @@ it yourself from L<http://www.gnuplot.info>.
 # The parent process gives the daughter 2 seconds to report progress, then
 # kills it dead.
     my($pid);
-    my ($undef, $file) = tempfile('gnuplot_test_XXXX');
+    my ($undef, $file) = tempfile();
 
     # Create command file
     open FOO, ">${file}_gzinta";
@@ -239,6 +239,7 @@ it yourself from L<http://www.gnuplot.info>.
 		    open STDOUT, ">$file";
 		    open STDERR, ">&STDOUT";
 		    open STDIN, "<${file}_gzinta";
+		    no warnings; 
 		    exec($exec_path);
 		    print BAR "Execution of $exec_path failed!\n";
 		    exit(1);

@@ -276,6 +276,7 @@ it yourself from L<http://www.gnuplot.info>.
 # Read what gnuplot had to say, and clean up our mess...
     open FOO, "<$file";
     my @lines = <FOO>;
+    close FOO;
     unlink $file;
     unlink $file."_gzinta";
     

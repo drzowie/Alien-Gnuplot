@@ -103,7 +103,7 @@ but it will fail on load until you install the gnuplot executable yourself.
 		$install_flag = 1;
 		print qq{
 
-Gnuplot seems to not exist oon your system, and you set PERL_MM_USE_DEFAULT --
+Gnuplot seems to not exist on your system, and you set PERL_MM_USE_DEFAULT --
 so I'll try to install it for you.
 
 };

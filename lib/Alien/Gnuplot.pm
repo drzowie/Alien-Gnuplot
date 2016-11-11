@@ -312,7 +312,7 @@ I could not parse a version number from its output.  Sorry, I give up.
 		$reading_terms = 1;
 	    }
 	} else {
-	    $line =~ s/^Press return for more\s*//;
+	    $line =~ s/^Press return for more\:\s*//;
 	    $line =~ m/^\s*(\w+)\s(.*[^\s])\s*$/ || next;
 	    push(@terms, $1);
 	    $terms{$1} = $2;

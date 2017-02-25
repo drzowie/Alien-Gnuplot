@@ -1,5 +1,12 @@
 Revision history for Alien-Gnuplot
+1.033   2017-02-24
 
+   - bumb version number again and fix MANIFEST problem
+   
+1.032   2017-02-23
+
+   - bump version number to get around a CPAN funny
+   
 1.031    2015-10-04
 
    - slightly more tolerant logic on the terminfo parsing avoids a problem where

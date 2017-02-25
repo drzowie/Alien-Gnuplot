@@ -140,7 +140,7 @@ use POSIX ":sys_wait_h";
 # overload the system VERSION to compare a required version against gnuplot itself, rather
 # than against the module version.
 
-our $VERSION = '1.031';
+our $VERSION = '1.033';
 
 # On install, try to make sure at least this version is present.
 our $GNUPLOT_RECOMMENDED_VERSION = '4.6';  
@@ -191,8 +191,9 @@ sub load_gnuplot {
 Alien::Gnuplot: no executable gnuplot found!  If you have gnuplot,
 you can put its exact location in your GNUPLOT_BINARY environment 
 variable or make sure your PATH contains it.  If you do not have
-gnuplot, you can reinstall Alien::Gnuplot to get it, or get
-it yourself from L<http://www.gnuplot.info>.
+gnuplot, you can reinstall Alien::Gnuplot (and its installation 
+script will try to install gnuplot via one of several standard 
+package managers) or get it yourself from L<http://www.gnuplot.info>.
 };
     }
     

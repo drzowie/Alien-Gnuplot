@@ -250,7 +250,9 @@ WriteMakefile(
 		   'File::Temp'  => 0,
 		   'HTTP::Tiny'  => 0,
 		   'POSIX'       => 0,
-		   'File::Spec'  => 0
+		   'File::Spec'  => 0,
+		   'Test::More'  => 0,
+		   'Test::Exception' => 0
 		       
     },
     META_ADD => {

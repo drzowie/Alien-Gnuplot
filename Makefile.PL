@@ -246,6 +246,9 @@ WriteMakefile(
     ($ExtUtils::MakeMaker::VERSION >= 6.3002
      ? ('LICENSE'=> 'perl')
      : ()),
+    ($ExtUtils::MakeMaker::VERSION >= 6.48
+     ? ('MIN_PERL_VERSION' => '5.6.0')
+     : ()),
     PREREQ_PM => { 'Time::HiRes' => 0,
 		   'File::Temp'  => 0,
 		   'HTTP::Tiny'  => 0,

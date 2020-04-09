@@ -2,7 +2,7 @@
 #
 #         FILE: 00-use.t
 #
-#  DESCRIPTION: Use the module, check it compiles, check module version
+#  DESCRIPTION: Use the module, check it compiles
 #
 #       AUTHOR: Pete Houston (pete), cpan@openstrike.co.uk
 #
@@ -10,12 +10,9 @@
 
 use strict;
 use warnings;
+no warnings 'once';
 
-use Test::More tests => 3;
+use Test::More tests => 2;
 
-BEGIN {
-	use_ok 'Alien::Gnuplot';
-}
-
-is ($Alien::Gnuplot::VERSION, '1.033', 'Module version matches');
-ok (defined $Alien::Gnuplot::version, 'Gnuplot found');
+use_ok 'Alien::Gnuplot';
+ok defined $Alien::Gnuplot::version, 'Gnuplot found';

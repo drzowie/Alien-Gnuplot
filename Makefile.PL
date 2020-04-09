@@ -251,7 +251,6 @@ WriteMakefile(
 		   'HTTP::Tiny'  => 0,
 		   'POSIX'       => 0,
 		   'File::Spec'  => 0
-		       
     },
     META_ADD => {
 	resources => {
@@ -260,6 +259,10 @@ WriteMakefile(
 	    bugtracker => 'craig@deforest.org'
 	}
     },		  
+    TEST_REQUIRES => {
+		   'Test::More'      => 0,
+		   'Test::Exception' => 0
+    },
 
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Alien-Gnuplot-* src/*[0-9]' },

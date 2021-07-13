@@ -135,6 +135,7 @@ use File::Spec;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/usleep/;
 use POSIX ":sys_wait_h";
+use Fcntl qw/SEEK_SET/;
 
 # VERSION here is for CPAN to parse -- it is the version of the module itself.  But we
 # overload the system VERSION to compare a required version against gnuplot itself, rather
@@ -240,6 +241,7 @@ package managers) or get it yourself from L<http://www.gnuplot.info>.
 		    open STDOUT, ">$file";
 		    open STDERR, ">&STDOUT";
 		    open STDIN, "<${file}_gzinta";
+		    seek STDIN, 0, SEEK_SET;
 		    no warnings; 
 		    exec($exec_path);
 		    print BAR "Execution of $exec_path failed!\n";

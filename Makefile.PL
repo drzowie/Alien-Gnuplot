@@ -1,5 +1,6 @@
 use strict;
 use ExtUtils::MakeMaker;
+use Alien::Build::MM;
 
 sub parseversion
 {
@@ -234,10 +235,23 @@ sub install_gnuplot_binary {
 ## Write a generic Makefile that puts the module in place.  Include a postamble
 ## that will also make the source code, if necessary.
 
-WriteMakefile(
+my $abmm = Alien::Build::MM->new;
+
+## Shared build and runtime prereqs because the `alienfile` calls into
+## `lib/Alien/Gnuplot.pm`.
+my %build_and_runtime_prereqs = (
+    'Time::HiRes' => 0,
+    'File::Temp'  => 0,
+    'HTTP::Tiny'  => 0,
+    'POSIX'       => 0,
+    'File::Spec'  => 0,
+);
+
+WriteMakefile($abmm->mm_args(
     NAME                => 'Alien::Gnuplot',
     AUTHOR              => 'Craig DeForest <craig@deforest.org>',
     VERSION             => parseversion(),
+    DISTNAME            => 'Alien-Gnuplot',
     ABSTRACT_FROM       => 'lib/Alien/Gnuplot.pm',
     ($ExtUtils::MakeMaker::VERSION >= 6.3002
      ? ('LICENSE'=> 'perl')
@@ -245,11 +259,20 @@ WriteMakefile(
     ($ExtUtils::MakeMaker::VERSION >= 6.48
      ? ('MIN_PERL_VERSION' => '5.6.0')
      : ()),
-    PREREQ_PM => { 'Time::HiRes' => 0,
-		   'File::Temp'  => 0,
-		   'HTTP::Tiny'  => 0,
-		   'POSIX'       => 0,
-		   'File::Spec'  => 0
+    PREREQ_PM => {
+        %build_and_runtime_prereqs,
+    },
+    BUILD_REQUIRES => {
+        "Alien::Build" => "0.32",
+        "Alien::Build::MM" => "0.32",
+        "ExtUtils::MakeMaker" => "6.52",
+        'File::Which' => 0,
+        %build_and_runtime_prereqs,
+    },
+    CONFIGURE_REQUIRES => {
+        "Alien::Build" => "0.32",
+        "Alien::Build::MM" => "0.32",
+        "ExtUtils::MakeMaker" => "6.52"
     },
     META_ADD => {
 	resources => {
@@ -265,5 +288,12 @@ WriteMakefile(
 
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Alien-Gnuplot-* src/*[0-9]' },
-	);
+));
 
+sub MY::postamble {
+    $abmm->mm_postamble(@_);
+}
+
+sub MY::install {
+    $abmm->mm_install(@_);
+}

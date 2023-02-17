@@ -32,6 +32,8 @@ jobs:
         uses: PDLPorters/devops/github-actions/install-dep-gnuplot@master
       - name: 'build-eumm-dist'
         uses: PDLPorters/devops/github-actions/build-eumm-dist@master
+        with:
+          dist-perl-deps-configure: ExtUtils::MakeMaker Alien::Build Alien::Build::MM
   ci:
     runs-on: ${{ matrix.os }}
     if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}

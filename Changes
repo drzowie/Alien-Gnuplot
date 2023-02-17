@@ -1,3 +1,6 @@
+  - Switch to using Alien::Build / alienfile to check and install Gnuplot.
+  - Alien::Gnuplot is now a subclass of Alien::Base.
+
 1.034 2021-07-23
 - reset stdin position before exec - thanks @vividsnow
 

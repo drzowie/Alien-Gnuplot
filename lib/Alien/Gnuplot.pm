@@ -131,6 +131,8 @@ package Alien::Gnuplot;
 use strict;
 our $DEBUG = 0; # set to 1 for some debugging output
 
+use parent qw( Alien::Base );
+
 use File::Spec;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/usleep/;
@@ -168,8 +170,7 @@ getting it yourself from L<http://www.gnuplot.info>.
     }
 }
 
-
-sub load_gnuplot {
+sub exe {
 ##############################
 # Search the path for the executable
 #
@@ -186,7 +187,18 @@ sub load_gnuplot {
 	    last if( -x $exec_path );
 	}
     }
-    
+
+    return $exec_path;
+}
+
+sub load_gnuplot {
+  my $exec_path = exe();
+  check_gnuplot($exec_path);
+}
+
+sub check_gnuplot {
+    my $exec_path = pop @_;
+
     unless(-x $exec_path) { 
 	die q{
 Alien::Gnuplot: no executable gnuplot found!  If you have gnuplot,

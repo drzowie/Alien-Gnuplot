@@ -1,0 +1,52 @@
+use alienfile;
+
+use File::Which;
+
+for my $gnuplot (
+    ( $ENV{'GNUPLOT_BINARY'} ? $ENV{'GNUPLOT_BINARY'} : () ),
+    'gnuplot'
+  ) {
+  plugin 'Probe::CommandLine' => (
+    command => $gnuplot,
+    args    => [ '--version' ],
+    match   => qr/^gnuplot ([0-9\.]+ patchlevel [0-9]+)/,
+    version => qr/^gnuplot ([0-9\.]+ patchlevel [0-9]+)/,
+  );
+}
+
+meta->around_hook( probe => sub {
+  my $orig  = shift;
+  my $build = shift;
+
+  eval {
+    unshift @INC, '../../lib', 'lib';
+    require Alien::Gnuplot;
+  };
+
+  my $install_type = $orig->($build, @_);
+
+  $build->log("Checking @{[ $build->runtime_prop->{command} ]}");
+  eval {
+    Alien::Gnuplot->check_gnuplot(
+      map { -f $_ ? $_ : which($_) } $build->runtime_prop->{command}
+    );
+    1;
+  } or do {
+    $build->log($@);
+    return 'share';
+  };
+
+  # Fix up the version from output to include the patchlevel as a dotted
+  # version component.
+  if( exists $build->runtime_prop->{version} ) {
+    $build->runtime_prop->{version} =~ s/^([0-9\.]+) patchlevel ([0-9]+)$/$1.$2/;
+  }
+  return $install_type;
+});
+
+share {
+  start_url 'https://sourceforge.net/projects/gnuplot/files/gnuplot/';
+  plugin 'Download' => (
+  );
+  #plugin 'Decode::SourceForge';
+}

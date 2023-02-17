@@ -1,0 +1,124 @@
+name: perl
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+  create:
+
+env:
+  IRC_REPO_OWNER: 'drzowie'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    if: ${{ always() }}
+    steps:
+      - uses: PDLPorters/devops/github-actions/irc-notifications@master
+        with:
+          target-notifications: true
+          repository_owner: ${{ env.IRC_REPO_OWNER }}
+  dist:
+    name: Make distribution using ExtUtils::MakeMaker
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Gnuplot
+        uses: PDLPorters/devops/github-actions/install-dep-gnuplot@master
+      - name: 'build-eumm-dist'
+        uses: PDLPorters/devops/github-actions/build-eumm-dist@master
+  ci:
+    runs-on: ${{ matrix.os }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    needs: [ notify, dist ]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        perl-version: ['5.10', '5.14', '5.20', '5.30']
+        alien-install-type: [ 'system' ]
+        include:
+          - perl-version: '5.30'
+            os: ubuntu-latest
+            release-test: true
+            coverage: true
+            alien-install-type: 'share'
+          ##########################
+          # Windows | system, share
+          ##########################
+          - perl-version: '5.30'
+            os: windows-latest
+            alien-install-type: 'system'
+          - perl-version: '5.30'
+            os: windows-latest
+            alien-install-type: 'share'
+          ##########################
+          # macOS   | system, share
+          ##########################
+          - perl-version: '5.30'
+            os: macos-11
+            alien-install-type: 'system'
+          - perl-version: '5.30'
+            os: macos-11
+            alien-install-type: 'share'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get dist artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: build-dir
+      - name: 'ci-dist: target-setup-perl'
+        uses: PDLPorters/devops/github-actions/ci-dist@master
+        with:
+          path: build-dir
+          target-setup-perl: true
+          perl-version: ${{ matrix.perl-version }}
+      - name: Install Gnuplot (system)
+        if: ${{ matrix.alien-install-type == 'system' }}
+        uses: PDLPorters/devops/github-actions/install-dep-gnuplot@master
+      - name: 'ci-dist: target-install-dist-perl-deps'
+        uses: PDLPorters/devops/github-actions/ci-dist@master
+        with:
+          path: build-dir
+          target-setup-perl: false
+          target-install-dist-perl-deps: true
+      - name: Install Perl optional deps
+        shell: bash
+        run: |
+          # test dep
+          if ${{ toJSON( runner.os != 'Windows' ) }}; then
+            $MYPERL -S cpanm -n FFI::Platypus || ( cat ~/.cpanm/build.log && false )
+          fi
+      - name: Set ALIEN_INSTALL_TYPE
+        shell: bash
+        run: |
+          echo "ALIEN_INSTALL_TYPE=${{ matrix.alien-install-type }}" >> $GITHUB_ENV
+      - name: 'ci-dist: target-all after install-dist-perl-deps'
+        uses: PDLPorters/devops/github-actions/ci-dist@master
+        with:
+          path: build-dir
+          target-setup-perl: false
+          target-install-dist-perl-deps: false
+          target-test-release-testing: true
+          target-test: true
+          test-enable-release-testing: ${{ matrix.release-test }}
+          test-enable-coverage: ${{ matrix.coverage }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-status:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    if: ${{ always() }}
+    needs: [ 'ci' ]
+    steps:
+      - uses: PDLPorters/devops/github-actions/irc-notifications@master
+        with:
+          target-build-status: true
+          needs: ${{ toJSON(needs) }}
+          repository_owner: ${{ env.IRC_REPO_OWNER }}

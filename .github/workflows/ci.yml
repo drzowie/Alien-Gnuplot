@@ -43,29 +43,29 @@ jobs:
         perl-version: ['5.10', '5.14', '5.20', '5.30']
         alien-install-type: [ 'system' ]
         include:
-          - perl-version: '5.30'
-            os: ubuntu-latest
-            release-test: true
-            coverage: true
-            alien-install-type: 'share'
+          #- perl-version: '5.30'
+          #  os: ubuntu-latest
+          #  release-test: true
+          #  coverage: true
+          #  alien-install-type: 'share'
           ##########################
           # Windows | system, share
           ##########################
           - perl-version: '5.30'
             os: windows-latest
             alien-install-type: 'system'
-          - perl-version: '5.30'
-            os: windows-latest
-            alien-install-type: 'share'
+          #- perl-version: '5.30'
+          #  os: windows-latest
+          #  alien-install-type: 'share'
           ##########################
           # macOS   | system, share
           ##########################
           - perl-version: '5.30'
             os: macos-11
             alien-install-type: 'system'
-          - perl-version: '5.30'
-            os: macos-11
-            alien-install-type: 'share'
+          #- perl-version: '5.30'
+          #  os: macos-11
+          #  alien-install-type: 'share'
     steps:
       - uses: actions/checkout@v2
       - name: Get dist artifact

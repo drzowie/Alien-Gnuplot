@@ -2,19 +2,6 @@ use strict;
 use ExtUtils::MakeMaker;
 use Alien::Build::MM;
 
-sub parseversion
-{
-    my $version;
-  open GP, 'lib/Alien/Gnuplot.pm' or die "Couldn't open lib/Alien/Gnuplot.pm";
-  for(<GP>){
-      if(m/our \$VERSION = \'([\d\.]+b?)\'/) {$version = $1;}
-      last if($version);
-  }
-  die "Couldn't parse version from Gnuplot.pm" unless($version);
-  close GP;
-  return $version;
-}
-
 sub MY::libscan
 {
     package MY;
@@ -250,8 +237,8 @@ my %build_and_runtime_prereqs = (
 WriteMakefile($abmm->mm_args(
     NAME                => 'Alien::Gnuplot',
     AUTHOR              => 'Craig DeForest <craig@deforest.org>',
-    VERSION             => parseversion(),
     DISTNAME            => 'Alien-Gnuplot',
+    VERSION_FROM        => 'lib/Alien/Gnuplot.pm',
     ABSTRACT_FROM       => 'lib/Alien/Gnuplot.pm',
     ($ExtUtils::MakeMaker::VERSION >= 6.3002
      ? ('LICENSE'=> 'perl')

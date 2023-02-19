@@ -135,9 +135,11 @@ use parent qw( Alien::Base );
 
 use File::Spec;
 use File::Temp qw/tempfile/;
+use File::Which;
 use Time::HiRes qw/usleep/;
 use POSIX ":sys_wait_h";
 use Fcntl qw/SEEK_SET/;
+use Env qw( @PATH );
 
 # VERSION here is for CPAN to parse -- it is the version of the module itself.  But we
 # overload the system VERSION to compare a required version against gnuplot itself, rather
@@ -174,26 +176,28 @@ sub exe {
 ##############################
 # Search the path for the executable
 #
+    my ($class) = @_;
+    $class ||= __PACKAGE__;
+
     my $exec_path;
+    # GNUPLOT_BINARY overrides at runtime
     if($ENV{'GNUPLOT_BINARY'}) {
 	$exec_path = $ENV{'GNUPLOT_BINARY'};
     } else {
-	my $exec_str = "gnuplot";
-	my @path = File::Spec->path();
-	for my $dir(@path) {
-	    $exec_path = File::Spec->catfile( $dir, $exec_str );
-	    last if( -x $exec_path );
-	    $exec_path .= ".exe";
-	    last if( -x $exec_path );
-	}
+	local $ENV{PATH} = $ENV{PATH};
+	unshift @PATH, $class->bin_dir;
+	$exec_path = which("gnuplot");
     }
 
     return $exec_path;
 }
 
 sub load_gnuplot {
-  my $exec_path = exe();
-  check_gnuplot($exec_path);
+  my ($class) = @_;
+  $class ||= __PACKAGE__;
+
+  my $exec_path = $class->exe;
+  $class->check_gnuplot($exec_path);
 }
 
 sub check_gnuplot {

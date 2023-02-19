@@ -129,9 +129,41 @@ EOF
   return $install_type;
 });
 
+
+sub do_binary_release_mswin32 {
+  requires 'Alien::7zip' => '0.03';
+  requires 'Alien::Build::CommandSequence';
+
+  start_url 'https://sourceforge.net/projects/gnuplot/files/gnuplot/5.4.6/gp546-win64-mingw.7z/download';
+  plugin 'Download';
+  extract [ '%{sevenzip} x %{.install.download}' ];
+  plugin 'Build::Copy';
+  gather sub {
+    my ($build) = @_;
+    $build->runtime_prop->{'style'} = 'binary';
+  };
+}
+
+sub do_source_release {
+  start_url 'https://sourceforge.net/projects/gnuplot/files/gnuplot/5.4.6/gnuplot-5.4.6.tar.gz/download';
+  plugin 'Download';
+  plugin 'Extract' => 'tar.gz';
+  plugin 'Build::Autoconf';
+  build [
+    '%{configure}',
+    '%{make}',
+    '%{make} install',
+  ];
+  gather sub {
+    my ($build) = @_;
+    $build->runtime_prop->{'style'} = 'source';
+  };
+}
+
 share {
-  start_url 'https://sourceforge.net/projects/gnuplot/files/gnuplot/';
-  plugin 'Download' => (
-  );
-  #plugin 'Decode::SourceForge';
+  if( $^O eq 'MSWin32' ) {
+    do_binary_release_mswin32;
+  } else {
+    do_source_release;
+  }
 }

@@ -55,7 +55,9 @@ my %build_and_runtime_prereqs = (
     'File::Temp'  => 0,
     'HTTP::Tiny'  => 0,
     'POSIX'       => 0,
+    'Env'         => 0,
     'File::Spec'  => 0,
+    'File::Which' => 0,
 );
 
 WriteMakefile($abmm->mm_args(
@@ -77,7 +79,6 @@ WriteMakefile($abmm->mm_args(
         "Alien::Build" => "0.32",
         "Alien::Build::MM" => "0.32",
         "ExtUtils::MakeMaker" => "6.52",
-        'File::Which' => 0,
         'version' => '0.77',
         %build_and_runtime_prereqs,
     },

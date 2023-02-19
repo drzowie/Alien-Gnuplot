@@ -44,7 +44,8 @@ meta->around_hook( probe => sub {
   }
 
   # Check against minimum version.
-  if( version->parse($Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION) > version->parse($build->runtime_prop->{version}) ) {
+  my $got_version = version->parse($build->runtime_prop->{version});
+  if( version->parse($Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION) > $got_version ) {
     $build->log(<<EOF);
 Gnuplot seems to exist on your system, but it is version @{[ $build->runtime_prop->{version} ]}.
 The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
@@ -52,9 +53,29 @@ EOF
     return 'share';
   } else {
     $build->log(<<EOF);
-Gnuplot version @{[ $build->runtime_prop->{version} ]} meets minimum version
+Gnuplot version $got_version meets minimum version
 requirement of Gnuplot version $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
 EOF
+  }
+
+  {
+    # Check for Windows piped input bug.
+
+    # Range (exclusive) where bug is present.
+    my @exclusive_range = map version->parse($_), ( '5.2.8', '5.4.6' );
+
+    if( $^O eq 'MSWin32'
+      && $exclusive_range[0] < $got_version
+      && $got_version        < $exclusive_range[1] ) {
+      $build->log(<<EOF);
+Gnuplot version $got_version on Windows has a known problem.
+
+Gnuplot between versions (@{[ join ", ", @exclusive_range ]}) exclusive fails
+to work properly when given piped input. See <https://github.com/PDLPorters/PDL-Graphics-Gnuplot/issues/79>
+for more information.
+EOF
+      return 'share';
+    }
   }
 
   return $install_type;

@@ -2,6 +2,9 @@
   - Alien::Gnuplot is now a subclass of Alien::Base.
   - Remove interactive installation option for using system package manager.
     The build now gives hints on what command to run instead.
+  - Add check for broken Gnuplot pipe IPC on Windows for versions in the
+    exclusive range ( 5.2.8, 5.4.6 ). See <https://github.com/PDLPorters/PDL-Graphics-Gnuplot/issues/79>
+    for more information.
 
 1.034 2021-07-23
 - reset stdin position before exec - thanks @vividsnow

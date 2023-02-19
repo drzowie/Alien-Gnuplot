@@ -60,6 +60,54 @@ EOF
   return $install_type;
 });
 
+
+# Separate hook after the above to give hints about installation to the system.
+meta->around_hook( probe => sub {
+  my $orig  = shift;
+  my $build = shift;
+
+  my $install_type = $orig->($build, @_);
+
+  # Map[ $^O, Tuple[ Name, Command, InstallCommand, Maybe[URL] ] ]
+  #
+  # NOTE: If the URL is defined, this is a self-installed package manager
+  # (i.e., for systems that do not come with a standard package manager), so
+  # print out its information regardless of whether it is installed.
+  my %os_installers = (
+    darwin => [
+      ['MacPorts','port', 'port install gnuplot', 'https://www.macports.org/'],
+      ['Fink'    ,'fink', 'fink install gnuplot', 'https://www.finkproject.org/'],
+      ['Homebrew','brew', 'brew install gnuplot', 'https://brew.sh/'],
+    ],
+    linux => [
+      [ 'YUM', 'yum'    , 'yum install gnuplot'    , undef ],
+      [ 'APT', 'apt-get', 'apt-get install gnuplot', undef ],
+    ],
+    MSWin32 => [
+      ['Chocolatey', 'choco', 'choco install gnuplot', 'https://chocolatey.org/' ],
+    ],
+  );
+
+  if( $install_type eq 'share' and exists $os_installers{$^O} ) {
+    $build->log(<<EOF);
+
+Gnuplot seems to not exist on your system. You can use the following package
+manager(s) to install Gnuplot to your system.
+
+EOF
+    for my $manager (@{ $os_installers{$^O} }) {
+      next if ! defined $manager->[3] && ! which( $manager->[1] );
+      $build->log(<<EOF);
+  - $manager->[0]@{[ defined $manager->[3] ? " (available at <$manager->[3]>)" : ""  ]}:
+      \$ $manager->[2]
+
+EOF
+    }
+  }
+
+  return $install_type;
+});
+
 share {
   start_url 'https://sourceforge.net/projects/gnuplot/files/gnuplot/';
   plugin 'Download' => (

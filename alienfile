@@ -1,6 +1,7 @@
 use alienfile;
 
 use File::Which;
+use version 0.77;
 
 for my $gnuplot (
     ( $ENV{'GNUPLOT_BINARY'} ? $ENV{'GNUPLOT_BINARY'} : () ),
@@ -41,6 +42,21 @@ meta->around_hook( probe => sub {
   if( exists $build->runtime_prop->{version} ) {
     $build->runtime_prop->{version} =~ s/^([0-9\.]+) patchlevel ([0-9]+)$/$1.$2/;
   }
+
+  # Check against minimum version.
+  if( version->parse($Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION) > version->parse($build->runtime_prop->{version}) ) {
+    $build->log(<<EOF);
+Gnuplot seems to exist on your system, but it is version @{[ $build->runtime_prop->{version} ]}.
+The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
+EOF
+    return 'share';
+  } else {
+    $build->log(<<EOF);
+Gnuplot version @{[ $build->runtime_prop->{version} ]} meets minimum version
+requirement of Gnuplot version $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
+EOF
+  }
+
   return $install_type;
 });
 

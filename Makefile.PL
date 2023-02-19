@@ -51,17 +51,6 @@ if(exists $ARGV[0] && $ARGV[0] eq 'README.pod')
     my $get_msg = '';
 
     eval q{ do q{./lib/Alien/Gnuplot.pm}; $get_msg = $@;};
-    
-    unless($get_msg) {
-	if($Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION > $Alien::Gnuplot::version) {
-	    $get_msg = qq{
-Gnuplot seems to exist on your system, but it is version $Alien::Gnuplot::version.
-The minimum recommended version is $Alien::Gnuplot::GNUPLOT_RECOMMENDED_VERSION.
-
-}
-	}
-
-    }
 
     if($get_msg) {
 	print $get_msg ;
@@ -254,6 +243,7 @@ WriteMakefile($abmm->mm_args(
         "Alien::Build::MM" => "0.32",
         "ExtUtils::MakeMaker" => "6.52",
         'File::Which' => 0,
+        'version' => '0.77',
         %build_and_runtime_prereqs,
     },
     CONFIGURE_REQUIRES => {

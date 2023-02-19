@@ -7,6 +7,9 @@
     for more information.
   - Can now download then build Gnuplot from source on non-MSWin32 platforms
     and download then install the pre-built Gnuplot binaries on MSWin32. GH#2.
+  - API change: load_gnuplot() is no longer called when loading the module
+    with `require` or `do`. It is instead called by `import()`. This means
+    that the usual `use Alien::Gnuplot;` should continue to work.
 
 1.034 2021-07-23
 - reset stdin position before exec - thanks @vividsnow

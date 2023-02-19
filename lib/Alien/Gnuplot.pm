@@ -161,6 +161,12 @@ our %colors;
 sub VERSION {
     my $module =shift;
     my $req_v = shift;
+    # Need this line when using
+    #
+    #   use Alien::Gnuplot 4.4;
+    #
+    # to check Gnuplot version.
+    $module->load_gnuplot unless $version; # already have version
     unless($req_v <= $version) {
 	die qq{
 
@@ -351,8 +357,11 @@ I could not parse a version number from its output.  Sorry, I give up.
     @colors = sort keys %colors;
 }
 
-
-load_gnuplot();
+sub import {
+    my $pkg = shift;
+    $pkg->SUPER::import(@_);
+    $pkg->load_gnuplot();
+};
 
 
 1;

@@ -102,7 +102,7 @@ riskier -- it involves waiting for the unknown executable to complete.
 
 =head1 REPOSITORIES
 
-Gnuplot's main home page is at L<http://www.gnuplot.info>.
+Gnuplot's main home page is at L<https://gnuplot.sourceforge.net/>.
 
 Alien::Gnuplot development is at L<http://github.com/drzowie/Alien-Gnuplot>.
 
@@ -172,7 +172,7 @@ sub VERSION {
 
 Alien::Gnuplot: Found gnuplot version $version, but you requested $req_v. 
 You should upgrade gnuplot, either by reinstalling Alien::Gnuplot or 
-getting it yourself from L<http://www.gnuplot.info>.
+getting it yourself from L<https://gnuplot.sourceforge.net/>.
 
 };
     }
@@ -216,7 +216,7 @@ you can put its exact location in your GNUPLOT_BINARY environment
 variable or make sure your PATH contains it.  If you do not have
 gnuplot, you can reinstall Alien::Gnuplot (and its installation 
 script will try to install gnuplot via one of several standard 
-package managers) or get it yourself from L<http://www.gnuplot.info>.
+package managers) or get it yourself from L<https://gnuplot.sourceforge.net/>.
 };
     }
     

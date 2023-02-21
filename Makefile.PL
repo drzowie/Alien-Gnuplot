@@ -48,6 +48,12 @@ if(exists $ARGV[0] && $ARGV[0] eq 'README.pod')
 
 my $abmm = Alien::Build::MM->new;
 
+my %configure_and_build_prereqs = (
+    "Alien::Build" => "0.32",
+    "Alien::Build::MM" => "0.32",
+    "ExtUtils::MakeMaker" => "6.52",
+);
+
 ## Shared build and runtime prereqs because the `alienfile` calls into
 ## `lib/Alien/Gnuplot.pm`.
 my %build_and_runtime_prereqs = (
@@ -76,16 +82,12 @@ WriteMakefile($abmm->mm_args(
         %build_and_runtime_prereqs,
     },
     BUILD_REQUIRES => {
-        "Alien::Build" => "0.32",
-        "Alien::Build::MM" => "0.32",
-        "ExtUtils::MakeMaker" => "6.52",
         'version' => '0.77',
+        %configure_and_build_prereqs,
         %build_and_runtime_prereqs,
     },
     CONFIGURE_REQUIRES => {
-        "Alien::Build" => "0.32",
-        "Alien::Build::MM" => "0.32",
-        "ExtUtils::MakeMaker" => "6.52"
+        %configure_and_build_prereqs,
     },
     META_ADD => {
 	resources => {

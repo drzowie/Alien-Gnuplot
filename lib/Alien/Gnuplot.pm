@@ -215,8 +215,7 @@ Alien::Gnuplot: no executable gnuplot found!  If you have gnuplot,
 you can put its exact location in your GNUPLOT_BINARY environment 
 variable or make sure your PATH contains it.  If you do not have
 gnuplot, you can reinstall Alien::Gnuplot (and its installation 
-script will try to install gnuplot via one of several standard 
-package managers) or get it yourself from L<https://gnuplot.sourceforge.net/>.
+script will try to install gnuplot) or get it yourself from L<https://gnuplot.sourceforge.net/>.
 };
     }
     

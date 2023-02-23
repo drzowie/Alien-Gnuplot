@@ -1,3 +1,4 @@
+1.040 2023-02-23
   - Switch to using Alien::Build / alienfile to check and install Gnuplot.
   - Alien::Gnuplot is now a subclass of Alien::Base.
   - Remove interactive installation option for using system package manager.

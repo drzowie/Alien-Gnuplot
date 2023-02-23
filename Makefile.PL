@@ -91,7 +91,7 @@ WriteMakefile($abmm->mm_args(
     },
     META_ADD => {
 	resources => {
-	    homepage => 'http://github.com/drzowie/Alien-Gnuplot',
+	    homepage => 'https://github.com/drzowie/Alien-Gnuplot',
 	    repository => 'git://github.com/drzowie/Alien-Gnuplot.git',
 	    bugtracker => 'craig@deforest.org'
 	}

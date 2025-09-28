@@ -1,3 +1,6 @@
+1.044 2025-09-28
+- Parse three-point version numbers from gnuplot
+
 1.043 2024-04-13
 - make any failure more verbose to help debugging
 
